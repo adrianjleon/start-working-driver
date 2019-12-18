@@ -3,9 +3,10 @@ from selenium.webdriver.common.keys import Keys
 
 chrome_driver = webdriver.Chrome(r'P:\proyectos-pycharm\drivers\chrome\chromedriver.exe')
 #chrome_driver2 = webdriver.Chrome(r'P:\proyectos-pycharm\drivers\chrome\chromedriver.exe')
-firefox_driver = webdriver.Chrome(r'P:\proyectos-pycharm\drivers\firefox\geckodriver.exe')
+#firefox_driver = webdriver.Chrome(r'P:\proyectos-pycharm\drivers\firefox\geckodriver.exe')
 
 url =  'https://www.seleniumeasy.com/test/basic-first-form-demo.html'
+url2 =  'https://www.google.com'
 
 #chrome_driver.maximize_window()
 chrome_driver.get(url)
@@ -31,12 +32,17 @@ chrome_driver.implicitly_wait(3)
 
 # NEW TAB chrome_driver.execute_script("window.open('https://www.google.com');")
 
-firefox_driver.get(url)
-firefox_driver.implicitly_wait(5)
-firefox_driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't')
+# Open a new window
+chrome_driver.execute_script("window.open('');")
 
+chrome_driver.switch_to.window(chrome_driver.window_handles[1])
+chrome_driver.get(url2)
 
+# Close the tab with URL B
+chrome_driver.close()
 
+chrome_driver.switch_to.window(chrome_driver.window_handles[0])
+print("Current Page Title is : %s" %chrome_driver.title)
 
 
 
