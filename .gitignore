@@ -1,0 +1,6 @@
+.idea
+database
+Pipfile.lock
+Pipfile
+geckodriver.log
+

@@ -45,6 +45,15 @@ chrome_driver.switch_to.window(chrome_driver.window_handles[0])
 print("Current Page Title is : %s" %chrome_driver.title)
 
 
+#Take rows from the table
+
+def takeTickesFromAOVivo(table):
+    
+    pass
+
+
+
+
 
 
 
