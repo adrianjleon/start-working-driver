@@ -1,5 +1,6 @@
 .idea
-database
+__pycache__
+database.py
 Pipfile.lock
 Pipfile
 geckodriver.log
