@@ -1,3 +1,4 @@
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -17,25 +18,65 @@ def log_in(driver, credentials):
 
     """
 
+    #OPEN GRAMARLY
+    if credentials['url'] == 'https://www.grammarly.com/signin?allowUtmParams=true':
+        print(credentials['url'])
+        try:
+            email_field = driver.find_element_by_xpath(
+                '/html/body/div[1]/div/div/div/div[4]/div/div[1]/div[2]/div/form/div[1]/div/input')
+            driver.implicitly_wait(10)
+            email_field.clear()
+            email_field.send_keys(credentials['user'])
+
+            button_continue = driver.find_element_by_css_selector(
+                '.TqtVC-_-_-_-_-_-client-guidelines-button--button-basicButton').click()
+
+            wait = WebDriverWait(driver, 10)
+
+            pass_field = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[1]/div/div/div/div[4]/div/div[1]/div[2]/div/form/div[2]/input')))
+
+            pass_field.send_keys(credentials['password'])
+
+            button_signInLoader = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[1]/div/div/div/div[4]/div/div[1]/div[2]/div/form/button')))
+
+            button_signInLoader = driver.find_element_by_xpath(
+                '/html/body/div[1]/div/div/div/div[4]/div/div[1]/div[2]/div/form/button').click()
+
+            delay = 3  # seconds
+            try:
+                myElem = WebDriverWait(driver, delay).until(EC.presence_of_element_located(
+                    (By.XPATH, '/html/body/div/div/div/div[2]/div[4]/div/div[3]/div[1]/div/input')))
+                print("Page is ready!")
+            except TimeoutException:
+                print("Loading took too much time!")
+
+            driver.get('https://app.grammarly.com/ddocs/531109872')
+        except Exception as e:
+            print("PROBLEMAS PARA ABRIR GRAMARLY", e)
+
     # User field
+    try:
+        user_text = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, credentials['user_field'])))
+        user_text.clear()
+        user_text.send_keys(credentials['user'])
+        driver.implicitly_wait(1)
 
-    user_text = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, credentials['user_field'])))
-    user_text.clear()
-    user_text.send_keys(credentials['user'])
-    driver.implicitly_wait(1)
+        # Password field
 
-    # Password field
+        user_pass = driver.find_element_by_id(credentials['pass_field'])
+        user_pass.clear()
+        user_pass.send_keys(credentials['password'])
 
-    user_pass = driver.find_element_by_id(credentials['pass_field'])
-    user_pass.clear()
-    user_pass.send_keys(credentials['password'])
+        # Click on the button by class
 
-    # Click on the button by class
-
-    driver.implicitly_wait(1)
-    button = driver.find_element_by_class_name(credentials['button'])
-    button.click()
-    driver.implicitly_wait(1)
+        driver.implicitly_wait(1)
+        button = driver.find_element_by_class_name(credentials['button'])
+        button.click()
+        driver.implicitly_wait(1)
+    except:
+        print("Algo salio mal con una pagina que no es GRamarly")
     return driver
 
 #OPEN THE FIRST WORK WINDOW ON FIREFOX
@@ -58,6 +99,11 @@ def openChromePhone(driver, data):
     try:
         openWeb(driver, data['url'])
         log_in(driver, data)
+        setAvailableButton = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[2]/div/div[3]/button')))
+
+        driver.implicitly_wait(500)
+        setAvailableButton.click()
+        setAvailableButton.click()
 
     except:
         print("We couldnt open the webs")
