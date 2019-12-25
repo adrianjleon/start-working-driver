@@ -1,90 +1,112 @@
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as EC, wait
 from selenium.webdriver.common.by import By
 import time
 
 class Dashlet:
+
     def __init__(self, driver):
         self.driver = driver
-        self.dashlet_path = '//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody/tr'
+        self.dashlet = '//*[@id="Dashboard0901-SearchTemplate03-box"]'
+            #'//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody/tr'
+        self.dashlet_path = self.dashlet + '//form/table/tbody/tr'
         self.tickets = {}
-        self.paginationNumberPath = '//*[@id="Dashboard0901-SearchTemplate03"]/span/a'
+        self.last_key = 0
+        self.paginationNumberPath = self.dashlet + '//span/a'
 
     def get_colum_info(self):
+        """
+        Get every column information from the dashlet
+        :return:
+        """
         column_info = []
         columns = self.driver.find_elements_by_xpath('//*[@id="Dashboard0901-SearchTemplate03"]/form/table/thead/tr/th')
         for column in columns:
             column_info.append(str(column.text))
         return column_info
 
-
     def get_results(self):
+        print(len( self.driver.find_elements_by_xpath(self.paginationNumberPath))   )
+        """
+        Get all the rows from the current pagination dashlet
+        :return:
+        """
 
         columns = self.get_colum_info()
-        data = self.tickets
+
+        data = {}
+
+
 
         # wait for element to appear, then hover it
-        wait = WebDriverWait(self.driver, 5)
-        wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody')))
+        wait = WebDriverWait(self.driver, 10)
+        wait.until(
+            EC.visibility_of_element_located((By.XPATH, '//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody')))
 
-        elements =  self.driver.find_elements_by_xpath(self.dashlet_path)
-        print('obtengo los primeros elementos ', len(elements))
+        elements = self.driver.find_elements_by_xpath(self.dashlet_path)
 
-        ifPrevius = 0
-
+        print('obtengo  ', len(elements), 'elementos del path')
 
 
 
         for element in elements:
-            current_index = len(data) + elements.index(element) + 1
+            current_index =  elements.index(element) + 1
+            print('CURRENT INDEX: ',current_index)
+
+
             parsed_data = {}
 
-            #print('element index', current_index  )
+            # print('element index', current_index  )
             for column in columns:
-                value = element.find_element_by_xpath('//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody/tr[{}]/td[{}]'.format(current_index - len(self.tickets), columns.index(column) + 1)).text
-                parsed_data.update({column : str(value)})
-            data.update({current_index: parsed_data })
-        print(' devuelvo la data')
+                value = element.find_element_by_xpath('//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody/tr[{}]/td[{}]'.format(current_index , columns.index(column) + 1)).text
+
+                parsed_data.update({column: str(value)})
+            data.update({current_index + self.last_key: parsed_data})
+        self.last_key = len(elements)
+        print('ultimo len antes de actualizar ', self.last_key)
         self.tickets.update(data)
 
+    def next_pagination(self, counter):
+        print('entrando a next pagination: ' , counter)
 
-    def checkForPagination(self, counter):
-        return counter >= len(self.paginationNumberPath)
+        time.sleep(1)
+        try:
+
+            next_page = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.dashlet + '//span//a[contains(text(), "{}")]'.format(counter))))
+            next_page.click()
+            print('dì clic')
+            time.sleep(5)
+            wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody')))
+
+        except Exception as e:
+            flag = False
+            print("no more pagination")
 
 
-    def get_num_all_results(self):
-        print(' entre a la funcion all result')
+    def check_for_pagination(self, counter):
+        print('entre al check de pagination con counter: ', counter)
+        flag = True
+        if counter <= (len( self.driver.find_elements_by_xpath(self.paginationNumberPath))):
+            print('es true q counter es menor o igual')
+            flag = True
+        else:
+            print('es menor retorno negativo por que pagination number path es igual a: ', len(self.paginationNumberPath))
+            flag = False
+        return flag
 
+    def get_all_results(self):
 
+        print(' entre a la funcion all results')
 
         counter = 2
 
         self.get_results()
 
-        while self.checkForPagination(counter):
+        print('voy a entrar al while')
 
-            time.sleep(1)
-            try:
-
-                next_page = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable((By.XPATH,'//*[@id="Dashboard0901-SearchTemplate03"]/span//a[contains(text(), "{}")]'.format(counter))))
-                next_page.click()
-                time.sleep(5)
-                wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody')))
-                self.tickets.update(self.get_results())
-                counter =+ 1
-
-            except Exception as e:
-                break
-                print("no more pagination")
-
-
-        return self.tickets
-
-    def get_num_of_results(self):
-        print('entre a la funcion numero de resultados ')
-        return len(self.driver.find_elements_by_xpath('//*[@id="Dashboard0901-SearchTemplate03"]/form/table/tbody/tr'))
-
-
-
-
+        while self.check_for_pagination(counter):
+            print('entre al while con counter: ' , counter)
+            self.next_pagination(counter)
+            self.get_results()
+            counter += 1

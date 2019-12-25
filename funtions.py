@@ -2,6 +2,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import time
 
 #OPEN A WEB
 def openWeb(driver, web):
@@ -100,7 +101,7 @@ def openChromePhone(driver, data):
         openWeb(driver, data['url'])
         log_in(driver, data)
         setAvailableButton = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[2]/div/div[3]/button')))
-
+        time.sleep(5)
         driver.implicitly_wait(500)
         setAvailableButton.click()
         setAvailableButton.click()
