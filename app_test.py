@@ -1,3 +1,6 @@
+from selenium import webdriver
+from dashlet import Dashlet
+
 
 chrome_driver = webdriver.Chrome(r'P:\proyectos-pycharm\drivers\chrome\chromedriver.exe')
 
@@ -11,11 +14,11 @@ log_in(chrome_driver,     {'url':   'http://nts.neutrona.com/',
 
 chrome_driver.implicitly_wait(10)
 
-table = Table(chrome_driver)
+dashlet = Dashlet(chrome_driver)
 
-print(table.get_colum_info())
 
-print(table.get_results())
+
+print(dashlet.get_results())
 
 
 
