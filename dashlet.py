@@ -32,7 +32,7 @@ class Dashlet:
         :return:
         """
 
-        columns = self.get_colum_info()
+        columns = self.get_column_info()
         data = {}
         # wait for element to appear, then hover it
         wait = WebDriverWait(self.driver, 10)
