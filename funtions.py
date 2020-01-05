@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from database import todosoperadores
 
 #OPEN A WEB
 def openWeb(driver, web):
@@ -112,3 +113,21 @@ def openChromePhone(driver, data):
 
 def takeTickesFromAOVivo(table):
     pass
+
+def operadoresPresentes(listaNombresPorComando):
+    operadoresPresentes = []
+
+    for i in range(1, len(listaNombresPorComando)):
+        #print('operador recibido por comando: ', listaNombresPorComando[i])
+        for operador in todosoperadores:
+            #print('busqueda en todos los operadores en base de datos:  ', operador)
+            #print(operador['nombre'].find(listaNombresPorComando[i].capitalize()))
+
+            if operador['nombre'].find(listaNombresPorComando[i].capitalize()) >= 0:
+
+                #print('el operador de base de datos corresponde al de turno: ', operador['nombre'].find(listaNombresPorComando[i].capitalize()) >= 0)
+                operadoresPresentes.append(operador)
+
+                break
+
+    return operadoresPresentes
